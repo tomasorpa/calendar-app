@@ -1,31 +1,17 @@
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { addHours } from "date-fns";
 import { NavBar } from "../components/Navbar";
 import { Calendar } from "react-big-calendar";
 import { localizer } from "../../helpers";
-import { Opacity } from "@mui/icons-material";
 import { CalendarEvent } from "../components/CalendarEvent";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CalendarModal } from "../components/CalendarModal";
-import { useUiStore } from "../../hooks/useUiStore";
+import { useUiStore, useCalendarStore } from "../../hooks";
+import { FabAddEvent } from "../components/FabAddEvent";
 
 export const CalendarPage = () => {
   const [lastView, setLastView] = useState(
     localStorage.getItem("lastView") || "week"
   );
-  const events = [
-    {
-      title: "dsfasa",
-      notes: "sdfgsdg",
-      start: new Date(),
-      end: addHours(new Date(), 2),
-      bgColor: "#fafafa",
-      user: {
-        _id: "123",
-        name: "Tomas",
-      },
-    },
-  ];
 
   const eventStyleGetter = (event, start, end, isSelected) => {
     const style = {
@@ -37,18 +23,24 @@ export const CalendarPage = () => {
     return { style };
   };
 
-  const { onOpencalendarModal } = useUiStore();
-  
-  const onSelect = () => {};
+  const { onOpenModal,ableDeleteBtn } = useUiStore();
+
+  const { events,setActiveEvent } = useCalendarStore();
+
+  const onSelect = (event) => {
+    setActiveEvent( event );
+  };
 
   const onViewChanged = (event) => {
     localStorage.setItem("lastView", event);
     setLastView(event);
   };
-   const handleDoubleClick = (event) => {
-    
-     console.log(event)
+
+  const handleDoubleClick = () => {
+    ableDeleteBtn()
+    onOpenModal();
   };
+
   return (
     <div
       style={{
@@ -75,10 +67,12 @@ export const CalendarPage = () => {
         components={{
           event: CalendarEvent,
         }}
+        onSelectEvent={onSelect}
         onDoubleClickEvent={handleDoubleClick}
         onView={onViewChanged}
       />
       <CalendarModal />
+      <FabAddEvent/>
     </div>
   );
 };

@@ -1,15 +1,27 @@
 import { useDispatch, useSelector } from "react-redux";
-import { onOpenCalendarModal } from "../store";
+import { onAbleDeleteBtn, onCloseCalendarModal, onDisableDeleteBtn, onOpenCalendarModal } from "../store";
 
 export const useUiStore = () => {
   const { isDateCalendarOpen } = useSelector((state) => state.ui);
   const dispatch = useDispatch();
 
-  const onOpencalendarModal = () => {
+  const onOpenModal = () => {
     dispatch(onOpenCalendarModal());
+  };
+  const onCloseModal = () => {
+    dispatch(onCloseCalendarModal());
+  };
+  const ableDeleteBtn = () => {
+    dispatch(onAbleDeleteBtn());
+  };
+  const disableDeleteBtn = () => {
+    dispatch(onDisableDeleteBtn());
   };
   return {
     isDateCalendarOpen,
-    onOpencalendarModal,
+    onOpenModal,
+    onCloseModal,
+    ableDeleteBtn,
+    disableDeleteBtn
   };
 };

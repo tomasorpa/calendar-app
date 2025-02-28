@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Modal from "react-modal";
 import {
   Button,
@@ -7,12 +7,15 @@ import {
   Box,
   createTheme,
   ThemeProvider,
+  Grid2,
 } from "@mui/material";
 import { addHours, differenceInMinutes } from "date-fns";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Swal from "sweetalert2";
 import { useUiStore } from "../../hooks/useUiStore";
+import { useSelector } from "react-redux";
+import { useCalendarStore } from "../../hooks";
 
 Modal.setAppElement("#root");
 
@@ -25,51 +28,74 @@ const theme = createTheme({
 });
 
 export const CalendarModal = () => {
-  const { isDateCalendarOpen } = useUiStore();
-  const [isOpen, setIsOpen] = useState(true);
+  const { isDateCalendarOpen, onCloseModal,disableDeleteBtn } = useUiStore();
+
   const [formValues, setFormValues] = useState({
     title: "",
     notes: "",
     start: new Date(),
     end: addHours(new Date(), 2),
   });
-
+  
+  const { startSavingEvent, deleteEvent } = useCalendarStore();
   const [didUserSumbit, setDidUserSumbit] = useState(false);
 
+  const { activeEvent } = useSelector((state) => state.calendar);
+  const { isDeleteBtnDisabled} =useSelector(state=>state.ui)
   const titleError = useMemo(() => {
     if (didUserSumbit && formValues.title.trim().length === 0) return true;
   }, [formValues.title, didUserSumbit]);
-  const onCloseModal = () => {
-    setIsOpen(false);
+
+  useEffect(() => {
+    if (activeEvent !== null) {
+      setFormValues({
+        ...activeEvent,
+      });
+    }
+  }, [activeEvent]);
+
+  const onClose = () => {
+    console.log("close");
+    onCloseModal();
   };
- 
 
   const handleOnChange = ({ target }) => {
     const { value, name } = target;
     setFormValues({ ...formValues, [name]: value });
   };
-  console.log();
-  const handleOnSubmit = (event) => {
+
+  const handleOnSubmit = async (event) => {
     setDidUserSumbit(true);
     event.preventDefault();
     const timeDifference = differenceInMinutes(
       formValues.end,
       formValues.start
     );
+
     if (timeDifference < 0 || isNaN(timeDifference)) {
       Swal.fire("Incorrect dates", "Correct input dates", "error");
       return;
     }
+
     if (formValues.title.length <= 0) {
       console.log(`Title field is Empty`);
       return;
     }
+
+    await startSavingEvent(formValues);
+    onCloseModal();
+  };
+
+  const handleDeleteEvent = () => {
+    console.log({ activeEvent });
+    deleteEvent({ ...activeEvent });
+    onClose();
   };
   return (
     <ThemeProvider theme={theme}>
       <Modal
         isOpen={isDateCalendarOpen}
-        onRequestClose={onCloseModal}
+        onRequestClose={onClose}
         className="modal"
         overlayClassName="modal-fondo"
         closeTimeoutMS={200}
@@ -162,16 +188,28 @@ export const CalendarModal = () => {
           <Typography variant="body2" color="textSecondary">
             Additional information
           </Typography>
-
-          <Button
-            variant="outlined"
-            color="primary"
-            fullWidth
-            type="submit"
-            sx={{ mt: 2 }}
-          >
-            Save
-          </Button>
+          <Grid2 container display={"flex"} justifyContent={"space-evenly"}>
+            <Button
+              variant="outlined"
+              onClick={handleDeleteEvent}
+              color="error"
+              sx={{ mt: 2 }}
+              disabled={isDeleteBtnDisabled}
+            >
+              Delete
+            </Button>
+            <Button variant="outlined" color="gray" sx={{ mt: 2 }}>
+              Cancel
+            </Button>
+            <Button
+              variant="outlined"
+              color="primary"
+              type="submit"
+              sx={{ mt: 2 }}
+            >
+              Save
+            </Button>
+          </Grid2>
         </Box>
       </Modal>
     </ThemeProvider>

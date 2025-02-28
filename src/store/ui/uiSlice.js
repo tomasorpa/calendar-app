@@ -4,6 +4,7 @@ export const uiSlice = createSlice({
   name: "ui",
   initialState: {
     isDateCalendarOpen: false,
+    isDeleteBtnDisabled: false,
   },
   reducers: {
     onOpenCalendarModal: (state) => {
@@ -12,7 +13,14 @@ export const uiSlice = createSlice({
     onCloseCalendarModal: (state) => {
       state.isDateCalendarOpen = false;
     },
+    onAbleDeleteBtn: (state) => {
+      state.isDeleteBtnDisabled = false;
+    },
+    onDisableDeleteBtn: (state) => {
+      state.isDeleteBtnDisabled = true;
+    },
   },
 });
 
-export const { onOpenCalendarModal, onCloseCalendarModal } = uiSlice.actions;
+export const { onOpenCalendarModal, onCloseCalendarModal,onAbleDeleteBtn
+,onDisableDeleteBtn } = uiSlice.actions;

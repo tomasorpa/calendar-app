@@ -6,7 +6,9 @@ import { store } from "./store";
 export const CalendarApp = () => {
   return (
     <Provider store={store}>
-      <BrowserRouter>
+      <BrowserRouter
+        future={{ v7_relativeSplatPath: true, v7_startTransition: true }}
+      >
         <AppRouter />
       </BrowserRouter>
     </Provider>
