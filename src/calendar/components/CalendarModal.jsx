@@ -22,13 +22,13 @@ Modal.setAppElement("#root");
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#1976d2",
+      main: "#24B0F9",
     },
   },
 });
 
 export const CalendarModal = () => {
-  const { isDateCalendarOpen, onCloseModal,disableDeleteBtn } = useUiStore();
+  const { isDateCalendarOpen, onCloseModal } = useUiStore();
 
   const [formValues, setFormValues] = useState({
     title: "",
@@ -36,12 +36,12 @@ export const CalendarModal = () => {
     start: new Date(),
     end: addHours(new Date(), 2),
   });
-  
-  const { startSavingEvent, deleteEvent } = useCalendarStore();
+
+  const { startSavingEvent, startDeletingEvent } = useCalendarStore();
   const [didUserSumbit, setDidUserSumbit] = useState(false);
 
   const { activeEvent } = useSelector((state) => state.calendar);
-  const { isDeleteBtnDisabled} =useSelector(state=>state.ui)
+  const { isDeleteBtnDisabled } = useSelector((state) => state.ui);
   const titleError = useMemo(() => {
     if (didUserSumbit && formValues.title.trim().length === 0) return true;
   }, [formValues.title, didUserSumbit]);
@@ -55,7 +55,6 @@ export const CalendarModal = () => {
   }, [activeEvent]);
 
   const onClose = () => {
-    console.log("close");
     onCloseModal();
   };
 
@@ -73,24 +72,27 @@ export const CalendarModal = () => {
     );
 
     if (timeDifference < 0 || isNaN(timeDifference)) {
-      Swal.fire("Incorrect dates", "Correct input dates", "error");
+      Swal.fire("Incorrect dates", "Correct your input dates", "error");
       return;
     }
-
     if (formValues.title.length <= 0) {
       console.log(`Title field is Empty`);
       return;
     }
-
+    console.log(formValues);
     await startSavingEvent(formValues);
     onCloseModal();
   };
-
-  const handleDeleteEvent = () => {
+  
+  const handleStartDeletingEvent = () => {
     console.log({ activeEvent });
-    deleteEvent({ ...activeEvent });
+    startDeletingEvent({ ...activeEvent });
     onClose();
   };
+  const [datepickerZIndex, setDatepickerZIndex] = useState(1499);
+  const onFixZIndex = () => {
+ setDatepickerZIndex(( state) => state + 2)
+}
   return (
     <ThemeProvider theme={theme}>
       <Modal
@@ -110,34 +112,33 @@ export const CalendarModal = () => {
           </Typography>
           <hr />
 
-          <Box sx={{ position: "relative", zIndex: 1500, mb: 2 }}>
+          <Box
+            sx={{ position: "relative", zIndex: { datepickerZIndex },  }}
+          >
             <DatePicker
               selected={formValues.start}
               onChange={(date) => setFormValues({ ...formValues, start: date })}
               showTimeSelect
               dateFormat="Pp"
-              popperModifiers={[
-                {
-                  name: "preventOverflow",
-                  options: { boundary: "viewport" },
-                },
-              ]}
+              withPortal
               customInput={
                 <TextField
                   fullWidth
                   size="small"
                   label="Start Date and Time"
                   margin="normal"
+                  onClick={onFixZIndex}
                 />
               }
             />
           </Box>
 
-          <Box sx={{ position: "relative", zIndex: 1400, mb: 2 }}>
+          <Box sx={{ position: "relative", zIndex: 1500,  }}>
             <DatePicker
               selected={formValues.end}
               onChange={(date) => setFormValues({ ...formValues, end: date })}
               dateFormat="Pp"
+              withPortal
               showTimeSelect
               minDate={formValues.start}
               popperModifiers={[
@@ -152,6 +153,7 @@ export const CalendarModal = () => {
                   size="small"
                   label="End Date and Time"
                   margin="normal"
+                  onClick={onFixZIndex}
                 />
               }
             />
@@ -191,14 +193,14 @@ export const CalendarModal = () => {
           <Grid2 container display={"flex"} justifyContent={"space-evenly"}>
             <Button
               variant="outlined"
-              onClick={handleDeleteEvent}
+              onClick={handleStartDeletingEvent}
               color="error"
               sx={{ mt: 2 }}
               disabled={isDeleteBtnDisabled}
             >
               Delete
             </Button>
-            <Button variant="outlined" color="gray" sx={{ mt: 2 }}>
+            <Button variant="outlined" color="gray" sx={{ mt: 2 }} onClick={onCloseModal}>
               Cancel
             </Button>
             <Button

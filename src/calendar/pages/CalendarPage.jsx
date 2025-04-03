@@ -7,28 +7,36 @@ import { useEffect, useState } from "react";
 import { CalendarModal } from "../components/CalendarModal";
 import { useUiStore, useCalendarStore } from "../../hooks";
 import { FabAddEvent } from "../components/FabAddEvent";
+import { useAuthStore } from "../../hooks/useAuthStore";
 
 export const CalendarPage = () => {
   const [lastView, setLastView] = useState(
     localStorage.getItem("lastView") || "week"
   );
-
+  const { user } =useAuthStore()
   const eventStyleGetter = (event, start, end, isSelected) => {
+    console.log(event)
+    console.warn(user)
+    const isEventMine =
+      user.uid === event.user._id ||
+      user.uid === event.user.uid;
     const style = {
-      backgroundColor: "#347CF7",
+      backgroundColor: isEventMine ? "#24B0F9" : "#E30000",
       opacity: 0.8,
-      color: "#ffff",
+      color: "#fff",
+      // color: isEventMine ? "#000" : "#fff",
+      border: 0,
     };
 
     return { style };
   };
 
-  const { onOpenModal,ableDeleteBtn } = useUiStore();
+  const { onOpenModal, ableDeleteBtn } = useUiStore();
 
-  const { events,setActiveEvent } = useCalendarStore();
+  const { events, setActiveEvent, startLoadingEvents } = useCalendarStore();
 
   const onSelect = (event) => {
-    setActiveEvent( event );
+    setActiveEvent(event);
   };
 
   const onViewChanged = (event) => {
@@ -37,9 +45,12 @@ export const CalendarPage = () => {
   };
 
   const handleDoubleClick = () => {
-    ableDeleteBtn()
+    ableDeleteBtn();
     onOpenModal();
   };
+  useEffect(() => {
+    startLoadingEvents();
+  }, []);
 
   return (
     <div
@@ -72,7 +83,7 @@ export const CalendarPage = () => {
         onView={onViewChanged}
       />
       <CalendarModal />
-      <FabAddEvent/>
+      <FabAddEvent />
     </div>
   );
 };

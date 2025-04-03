@@ -1,13 +1,32 @@
+import { CalendarMonth, LogoutOutlined } from "@mui/icons-material";
 import {
-  CalendarMonth,
-  LogoutOutlined,
-} from "@mui/icons-material";
-import { AppBar, Grid2, IconButton, Toolbar, Typography } from "@mui/material";
+  AppBar,
+  Box,
+  Grid2,
+  IconButton,
+  Toolbar,
+  Typography,
+} from "@mui/material";
+import { useAuthStore } from "../../hooks/useAuthStore";
+import { onLogoutCalendar } from "../../store";
 
 export const NavBar = () => {
-  
+  const { user, startOnLogout } = useAuthStore();
+  const onLogout = () => {
+    startOnLogout();
+    onLogoutCalendar();
+  };
   return (
-    <AppBar position="relative" sx={{height:"50px",display:"flex",justifyContent:"center"}}>
+    <AppBar
+      position="relative"
+      sx={{
+        height: "50px",
+        display: "flex",
+        justifyContent: "center",
+        backgroundColor: "#EEEEF0",
+        color: "#000",
+      }}
+    >
       <Toolbar>
         {/* <IconButton
           edge="start"
@@ -23,16 +42,19 @@ export const NavBar = () => {
           width={"100%"}
           alignItems="center"
         >
-          <IconButton color="inherit">
-            <CalendarMonth sx={{ mr: 1 }} />
+          <Grid2 container alignItems="center">
+            <img src="/images/logo.svg" style={{ width: "30px" }} />
             <Typography
               variant="h6"
-              sx={{ fontSize: { xs: "1rem", sm: "1.25rem", md: "1.5rem" } }}
+              sx={{
+                ml: 1,
+                fontSize: { xs: "1rem", sm: "1.25rem", md: "1.5rem" },
+              }}
             >
-              Tomas Ortega
+              {user.name}
             </Typography>
-          </IconButton>
-          <IconButton color="error">
+          </Grid2>
+          <IconButton color="error" onClick={onLogout}>
             <LogoutOutlined />
           </IconButton>
         </Grid2>

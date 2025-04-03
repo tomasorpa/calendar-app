@@ -2,11 +2,12 @@ import { Fab } from "@mui/material";
 import { useUiStore, useCalendarStore } from "../../hooks";
 import { addHours } from "date-fns";
 import { AddOutlined } from "@mui/icons-material";
+import { useAuthStore } from "../../hooks/useAuthStore";
 
 export const FabAddEvent = () => {
   const { onOpenModal, disableDeleteBtn } = useUiStore();
   const { setActiveEvent } = useCalendarStore();
-
+  const { user}=useAuthStore()
   const handleOnClick = () => {
     setActiveEvent({
       title: "",
@@ -14,10 +15,7 @@ export const FabAddEvent = () => {
       start: new Date(),
       end: addHours(new Date(), 2),
       bgColor: "#fafafa",
-      user: {
-        _id: "123",
-        name: "Tomas",
-      },
+      user
     });
     onOpenModal();
     disableDeleteBtn();
